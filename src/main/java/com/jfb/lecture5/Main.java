@@ -26,48 +26,19 @@ public class Main {
             try {
                 busTicket = new ObjectMapper().readValue(input, BusTicket.class);
 
-                if (busTicket.getStartDate() == null || busTicket.getStartDate().isEmpty()) {
+                if (validateStartDate(busTicket.getStartDate()) == false) {
                     validationResult = false;
                     startDate++;
-
-                } else {
-                    LocalDate currentDate = LocalDate.now();
-                    int data = busTicket.getStartDate().compareTo(String.valueOf(currentDate));
-                    if (data > 0) {
-                        validationResult = false;
-                        startDate++;
-                    }
                 }
 
-                if (busTicket.getTicketType() == null || busTicket.getTicketType().isEmpty()) {
+                if (validateTicketType(busTicket.getTicketType(), busTicket.getStartDate()) == false) {
                     validationResult = false;
                     ticketType++;
                 }
 
-                switch (busTicket.getTicketType()) {
-                    case "DAY", "WEEK", "YEAR":
-                        break;
-                    case "MONTH": {
-                        if (!busTicket.getStartDate().isEmpty()) {
-                            validationResult = false;
-                            ticketType++;
-                        }
-                        break;
-                    }
-                    default:
-                        validationResult = false;
-                        ticketType++;
-                }
-
-                if (busTicket.getPrice() == null) {
+                if (validatePrice(busTicket.getPrice()) == false) {
                     validationResult = false;
                     price++;
-                } else {
-                    int i = Integer.parseInt(busTicket.getPrice());
-                    if (i == 0 || i % 2 == 1) {
-                        validationResult = false;
-                        price++;
-                    }
                 }
 
                 if (validationResult) {
@@ -89,13 +60,13 @@ public class Main {
         System.out.println("Total = " + total);
         System.out.println("Valid = " + validTicket);
 
-        if (startDate > ticketType && startDate > price) {
+        if (startDate >= ticketType && startDate >= price) {
             System.out.println("Most popular violation = Start Data");
         } else {
-            if (ticketType > price && ticketType > startDate) {
+            if (ticketType >= price && ticketType >= startDate) {
                 System.out.println("Most popular violation = Ticket Type");
             } else {
-                if (price > ticketType && price > startDate) {
+                if (price >= ticketType && price >= startDate) {
                     System.out.println("Most popular violation = Price");
                 }
             }
@@ -105,4 +76,51 @@ public class Main {
     private static String getInput() {
         return new Scanner(System.in).nextLine();
     }
+
+    private static boolean validateStartDate(String startDate) {
+        if (startDate == null || startDate.isEmpty()) {
+            return false;
+        } else {
+            LocalDate currentDate = LocalDate.now();
+            int data = startDate.compareTo(String.valueOf(currentDate));
+            if (data > 0) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    private static boolean validateTicketType (String ticketType, String startDate) {
+        if (ticketType == null || ticketType.isEmpty()) {
+            return  false;
+        }
+
+        switch (ticketType) {
+            case "DAY", "WEEK", "YEAR":
+                return true;
+            case "MONTH": {
+                if (!startDate.isEmpty()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            default: return false;
+        }
+    }
+
+    private static boolean validatePrice (String price){
+        if (price == null) {
+            return false;
+        } else {
+            int i = Integer.parseInt(price);
+            if (i == 0 || i % 2 == 1) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
 }
